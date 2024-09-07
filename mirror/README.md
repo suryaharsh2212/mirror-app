@@ -1,3 +1,0 @@
-# mirror
-
-My new module
