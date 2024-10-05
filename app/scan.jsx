@@ -20,8 +20,8 @@ export default function App() {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-    console.log(data);
+    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    
     router.push({pathname:'/connector', params:{data}})
     
   };
@@ -36,12 +36,12 @@ export default function App() {
   return (
     <View style={styles.container}>
       <CameraView
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}   
         barcodeScannerSettings={{
           barcodeTypes: ["qr", "pdf417"],
         }}
         style={StyleSheet.absoluteFillObject}
-        // className="" 
+      
       />
       {scanned && (
         <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />

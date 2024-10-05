@@ -1,13 +1,26 @@
-//   
-
-
-
-
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, Alert, Animated } from 'react-native';
+import { styled } from 'nativewind';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
-import { Button } from 'react-native';
+import { router, useRouter } from 'expo-router';
 
-export default function App() {
-  const ws = new WebSocket('ws://192.168.31.102:8080'); // Replace with your PC's IP
+export default function Connector() {
+  const router=useRouter()
+  const StyledTouchableOpacity = styled(TouchableOpacity); 
+  const StyledText = styled(Text);
+  
+  const ws = new WebSocket('ws://192.168.43.8:8080');
+  const [controlsEnabled, setControlsEnabled] = useState(false);
+  const [fadeAnim] = useState(new Animated.Value(1)); // For button animations
+
+  // Animate button fade effect
+  const animateButton = () => {
+    Animated.sequence([
+      Animated.timing(fadeAnim, { toValue: 0.8, duration: 150, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true })
+    ]).start();
+  };
 
   ws.onopen = () => {
     console.log('Connected to WebSocket server');
@@ -19,145 +32,144 @@ export default function App() {
 
   ws.onerror = (e) => {
     console.error('WebSocket error:', e.message);
+    router.push('/scan')
   };
 
   ws.onclose = (e) => {
     console.log('WebSocket connection closed');
+   
   };
 
   const startMirroring = () => {
     ws.send('start');
+    animateButton();
+    Alert.alert('Mirroring Started', 'Your screen mirroring has started successfully!');
   };
 
-  return <Button className="h-screen w-screen flex justify-center items-center" title="Start Mirroring" onPress={startMirroring} />;
+  const stopMirroring = () => {
+    ws.send('stop');
+    animateButton();
+    Alert.alert('Mirroring Stopped', 'Your screen mirroring has been stopped.');
+  };
+
+  const enableMouse = () => {
+    ws.send('mouse-event');
+  };
+
+  const toggleControls = () => {
+    setControlsEnabled(!controlsEnabled);
+    
+    if (!controlsEnabled) {
+      // stopMirroring() 
+      enableMouse();
+      Alert.alert('Mouse Controls Enabled', 'you can now control your Phone with the Mouse and Keyboard!');
+    }
+    else{
+      stopMirroring();
+    }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F0F4F8', padding: 24 }}>
+      <View style={{ width: '100%', alignItems: 'center', paddingBottom: 30 }}>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#2D3748', marginBottom: 10, textAlign: 'center' }}>
+          Screen Mirroring Control
+        </Text>
+        <Text style={{ fontSize: 16, color: '#718096', textAlign: 'center', maxWidth: 280 }}>
+          Manage your screen mirroring and input controls with ease.
+        </Text>
+      </View>
+
+      <View className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <StyledTouchableOpacity 
+            onPress={startMirroring}
+            style={{ 
+              backgroundColor: '#4299E1', 
+              borderRadius: 16, 
+              paddingVertical: 18, 
+              marginBottom: 20, 
+              shadowColor: '#000', 
+              shadowOpacity: 0.15, 
+              shadowRadius: 6, 
+              shadowOffset: { width: 0, height: 4 } 
+            }}
+            activeOpacity={0.85}
+          >
+            <StyledText 
+              style={{ 
+                textAlign: 'center', 
+                color: '#FFF', 
+                fontSize: 18, 
+                fontWeight: '600' 
+              }}
+            >
+              Start Mirroring
+            </StyledText>
+          </StyledTouchableOpacity>
+        </Animated.View>
+
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <StyledTouchableOpacity 
+            onPress={stopMirroring}
+            style={{ 
+              backgroundColor: '#F56565', 
+              borderRadius: 16, 
+              paddingVertical: 18, 
+              marginBottom: 20, 
+              shadowColor: '#000', 
+              shadowOpacity: 0.15, 
+              shadowRadius: 6, 
+              shadowOffset: { width: 0, height: 4 } 
+            }}
+            activeOpacity={0.85}
+          >
+            <StyledText 
+              style={{ 
+                textAlign: 'center', 
+                color: '#FFF', 
+                fontSize: 18, 
+                fontWeight: '600' 
+              }}
+            >
+              Stop Mirroring
+            </StyledText>
+          </StyledTouchableOpacity>
+        </Animated.View>
+
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <StyledTouchableOpacity 
+            onPress={toggleControls}
+            style={{ 
+              backgroundColor: controlsEnabled ? '#38A169' : '#ED8936', 
+              borderRadius: 16, 
+              paddingVertical: 18, 
+              shadowColor: '#000', 
+              shadowOpacity: 0.15, 
+              shadowRadius: 6, 
+              shadowOffset: { width: 0, height: 4 } 
+            }}
+            activeOpacity={0.85}
+          >
+            <StyledText 
+              style={{ 
+                textAlign: 'center', 
+                color: '#FFF', 
+                fontSize: 18, 
+                fontWeight: '600' 
+              }}
+            >
+              {(!controlsEnabled) ? 'Enable Mouse Controls' : 'Disable Mouse Controls'}
+            </StyledText>
+          </StyledTouchableOpacity>
+        </Animated.View>
+      </View>
+
+      <View style={{ marginTop: 40, width: '100%', alignItems: 'center' }}>
+        <Text style={{ fontSize: 14, color: '#A0AEC0' }}>
+          Mouse Controls Status: {controlsEnabled ? 'Controls Enabled' : 'Controls Disabled'}
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
 }
-
-
-// import React, { useState, useEffect, useRef } from 'react';
-// import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
-// import { captureScreen } from 'react-native-view-shot';
-
-// const Connector = () => {
-//   const [message, setMessage] = useState('');
-//   const [textInput, setTextInput] = useState('');
-//   const [ws, setWs] = useState(null);
-//   const [imageUri, setImageUri] = useState(null);
-//   const [isCapturing, setIsCapturing] = useState(false);
-//   const [captureInterval, setCaptureInterval] = useState(null);
-//   const viewRef = useRef(null); // Ref for capturing the view
-
-//   useEffect(() => {
-//     const socket = new WebSocket(''); // Update with your server's IP
-
-//     socket.onopen = () => {
-//       console.log('Connected to WebSocket server');
-//       setWs(socket);
-//     };
-
-//     socket.onmessage = (e) => {
-//       console.log('Message from server:', e.data);
-//       setMessage(e.data);
-//     };
-
-//     socket.onerror = (e) => {
-//       console.error('WebSocket error:', e.message);
-//     };
-
-//     socket.onclose = (e) => {
-//       console.log('WebSocket connection closed:', e.code, e.reason);
-//     };
-
-//     return () => {
-//       socket.close();
-//       if (captureInterval) {
-//         clearInterval(captureInterval);
-//       }
-//     };
-//   }, [captureInterval]);
-
-//   const sendMessage = () => {
-//     if (ws) {
-//       ws.send(textInput); // Send the text input value to the server
-//     }
-//   };
-
-//   const captureAndSendScreen = () => {
-//     captureScreen({
-//       format: 'jpg',
-//       quality: 0.8,
-//     }).then(uri => {
-//       setImageUri(uri);
-//       fetch(uri)
-//         .then(response => response.blob())
-//         .then(blob => {
-//           const reader = new FileReader();
-//           reader.onloadend = () => {
-//             const base64data = reader.result.split(',')[1];
-//             if (ws) {
-//               ws.send(base64data); // Send the captured image data to the server
-//             }
-//           };
-//           reader.readAsDataURL(blob);
-//         })
-//         .catch(err => console.error(err));
-//     }).catch(error => console.error(error));
-//   };
-
-//   const startCapture = () => {
-//     if (!isCapturing) {
-//       setIsCapturing(true);
-//       const intervalId = setInterval(captureAndSendScreen, 5000); // Capture every 5 seconds
-//       setCaptureInterval(intervalId);
-//     }
-//   };
-
-//   const stopCapture = () => {
-//     if (isCapturing) {
-//       setIsCapturing(false);
-//       clearInterval(captureInterval);
-//       setCaptureInterval(null);
-//     }
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <View ref={viewRef}>
-//         <TextInput
-//           style={styles.input}
-//           placeholder="Enter your message"
-//           value={textInput}
-//           onChangeText={setTextInput}
-//         />
-//         <Button title="Send Message" onPress={sendMessage} />
-//         <Button title="Start Screen Capture" onPress={startCapture} />
-//         <Button title="Stop Screen Capture" onPress={stopCapture} />
-//         {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-//         <Text>{message ? `Message from server: ${message}` : 'Waiting for message...'}</Text>
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 16,
-//   },
-//   input: {
-//     height: 40,
-//     borderColor: 'gray',
-//     borderWidth: 1,
-//     width: '100%',
-//     marginBottom: 16,
-//     paddingHorizontal: 8,
-//   },
-//   image: {
-//     width: 100,
-//     height: 100,
-//     marginTop: 16,
-//   },
-// });
-
-// export default Connector;

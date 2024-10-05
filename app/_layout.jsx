@@ -2,8 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { SplashScreen ,Stack} from 'expo-router'
 import {useFonts} from "expo-font"
-import { Provider } from 'react-redux'
-import { store } from '../Redux/store'
+
 import { useEffect } from 'react'
 
 
@@ -37,11 +36,11 @@ const _layout = () => {
   }
 
   return (
-<Provider store={store}>
+
 <Stack>
     <Stack.Screen name='index' options={{headerShown:false}} />
 </Stack>
-</Provider>
+
 
   )
 }

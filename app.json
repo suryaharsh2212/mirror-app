@@ -8,9 +8,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/Sp.png",
+      "image": "./assets/Finalsplash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFA500"
+      "backgroundColor": "#4E4376"
     },
     "ios": {
       "supportsTablet": true
@@ -39,6 +39,11 @@
           "recordAudioAndroid": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7ba852c3-c0e6-49c6-b700-4b9f9d361d8f"
+      }
+    }
   }
 }
